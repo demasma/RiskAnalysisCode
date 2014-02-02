@@ -7,7 +7,7 @@ include Enumerable
 # http://stackoverflow.com/questions/7372489/whats-the-efficient-way-to-
 #        multiply-two-arrays-and-get-sum-of-multiplied-values
 #
-def expected_value(state_prob, payoff)
+def ExpectedValue(state_prob, payoff)
   if state_prob.size == payoff.size
     sum, i, size = 0, 0, state_prob.size
     while i < size
@@ -20,7 +20,7 @@ def expected_value(state_prob, payoff)
   end
 end
 
-def most_likely(state_prob, payoff)
+def MostLikely(state_prob, payoff)
   if state_prob.size == payoff.size
     puts "The most likely value is: #{sum}."
   else
@@ -45,25 +45,26 @@ def ExpOppLoss(state_prob, payoff, eM, eol)
     eol[i] = sum 
     i += 1
   end
-  puts "The minimum expected opportunity loss is #{eol.min}."
+  puts "The minimum expected opportunity loss is #{eol.min} at #{eol.index(eol.min) + 1}th decision."
 end
- 
-decisions = {"small" => {"excl" => [0.3, 250], 
-                         "good" => [0.5, 100], 
-                         "poor" => [0.2, -150]},
-             "regul" => {"excl" => [0.3, 400], 
-                         "good" => [0.5, 220], 
-                         "poor" => [0.2, -30]},
-             "large" => {"excl" => [0.3, 200], 
-                         "good" => [0.5, 100], 
-                         "poor" => [0.2, 10]}}
 
-# decisions.each do |key, value|
-#   value.each do |state, payoff|
-#     puts "#{state} = #{payoff}"
-#   end
-# end
+def Pessimistic(payoff, optmu)
+  i, maxi = 0, payoff[0].size
+  while i < maxi
+    optmu[i] = [payoff[i].index(payoff[i].min), payoff[i].min]
+    i += 1
+  end
+  puts "The optimal pessimistic payoff is #{optmu}."
+end
 
+def Optimistic(payoff, optmu)
+  i, maxi = 0, payoff[0].size
+  while i < maxi
+    optmu[i] = [payoff[i].index(payoff[i].max), payoff[i].max]
+    i += 1
+  end
+  puts "The optimal optimistic payoff is #{optmu}."
+end
 
 pr_s_i = [0.3, 0.5, 0.2]
 mu_1 = [250, 100, -150]
@@ -74,12 +75,34 @@ mu_ij = [mu_1, mu_2, mu_3]
 
 eM = Array.new
 eol = Array.new
-ExpOppLoss(pr_s_i, mu_ij, eM, eol)
-
+optmu = Array.new
 
 puts "Small Crutches:"
-expected_value(pr_s_i, mu_1)
+ExpectedValue(pr_s_i, mu_1)
 puts "Regular Crutches:"
-expected_value(pr_s_i, mu_2)
+ExpectedValue(pr_s_i, mu_2)
 puts "Large Crutches:"
-expected_value(pr_s_i, mu_3)
+ExpectedValue(pr_s_i, mu_3)
+
+ExpOppLoss(pr_s_i, mu_ij, eM, eol)
+
+Pessimistic(mu_ij, optmu)
+Optimistic(mu_ij, optmu)
+
+# decisions = {"small" => {"excl" => [0.3, 250], 
+#                          "good" => [0.5, 100], 
+#                          "poor" => [0.2, -150]},
+#              "regul" => {"excl" => [0.3, 400], 
+#                          "good" => [0.5, 220], 
+#                          "poor" => [0.2, -30]},
+#              "large" => {"excl" => [0.3, 200], 
+#                          "good" => [0.5, 100], 
+#                          "poor" => [0.2, 10]}}
+# 
+# # decisions.each do |key, value|
+# #   value.each do |state, payoff|
+# #     puts "#{state} = #{payoff}"
+# #   end
+# # end
+# 
+# 
