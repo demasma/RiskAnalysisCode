@@ -1,6 +1,18 @@
 #!/usr/bin/ruby
 
-include Enumerable
+def gnuplot(commands)
+  IO.popen("gnuplot", "w") { |io| io.puts commands }
+end
+
+  commands = %Q(
+    set terminal svg
+    set output "curves.svg"
+    plot [-10:10] sin(x), atan(x), cos(atan(x))
+    )
+
+gnuplot(commands)
+
+
 
 # Computes the expected value of a list of probabilities and the
 #   corresponding `cost'.
@@ -66,6 +78,29 @@ def Optimistic(payoff, optmu)
   puts "The optimal optimistic payoff is #{optmu}."
 end
 
+def HurwitzRule(payoff, optmu)
+  i, maxi = 0, payoff[0].size
+  while i < maxi
+    optmu[i] = payoff[i].minmax
+    i += 1
+  end
+  commands = %Q(
+                set terminal png
+                set output "hurwitz.png"
+                plot [0:1])
+  i, maxi = 0, payoff[0].size
+  while i < maxi
+    if i == maxi-1
+      commands <<  "#{optmu[i][1]} + (#{optmu[i][0]} - #{optmu[i][1]}) * x"
+    else
+      commands <<  "#{optmu[i][1]} + (#{optmu[i][0]} - #{optmu[i][1]}) * x,"
+    end
+    i += 1
+  end
+  gnuplot(commands)
+  puts commands
+end
+
 pr_s_i = [0.3, 0.5, 0.2]
 mu_1 = [250, 100, -150]
 mu_2 = [400, 220, -30]
@@ -88,6 +123,7 @@ ExpOppLoss(pr_s_i, mu_ij, eM, eol)
 
 Pessimistic(mu_ij, optmu)
 Optimistic(mu_ij, optmu)
+HurwitzRule(mu_ij, optmu)
 
 # decisions = {"small" => {"excl" => [0.3, 250], 
 #                          "good" => [0.5, 100], 
